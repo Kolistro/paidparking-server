@@ -43,14 +43,17 @@ public class ReservationHistoryEntity {
 
     // Информация об оплате (снэпшот)
     private Long paymentAmount;
-
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
-    private String paymentExternalId;
-    private LocalDateTime paymentDate;
-    private LocalDateTime paymentConfirmationDate;
-    private String paymentRedirectUrl;
+    private LocalDateTime paymentCreatedAt = LocalDateTime.now();
+    private LocalDateTime paymentReceiptUploadedAt;
+    private LocalDateTime paymentConfirmedAt;
+    @Lob
+    @Column(name = "receipt_file")
+    private byte[] receiptFile;
+    private String receiptFileName;
+    private String receiptContentType;
 
     // Когда была создана запись в истории
     private LocalDateTime archivedAt = LocalDateTime.now();

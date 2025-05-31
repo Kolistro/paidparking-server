@@ -55,7 +55,6 @@ public class UserService {
         return userMapper.toDto(userEntities);
     }
 
-    // ToDo в каком сервесе лучше оставить этот метод, у пользователя? или у роли?
     public Set<RoleResponseDto> getRolesUserById(Long id){
         UserEntity userEntity = userRepo.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователя c id = " + id + " не существует."));

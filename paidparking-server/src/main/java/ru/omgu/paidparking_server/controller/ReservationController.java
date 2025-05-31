@@ -46,13 +46,6 @@ public class ReservationController {
         return ResponseEntity.ok(commonResponse);
     }
 
-    @PatchMapping("/{reservationId}/status/expire")
-    public ResponseEntity<CommonResponse<ReservationResponseDto>> expireReservation(@PathVariable Long reservationId){
-        HttpStatus status = HttpStatus.OK;
-        CommonResponse<ReservationResponseDto> commonResponse =
-                new CommonResponse<>(reservationService.expireReservation(reservationId), status.value());
-        return ResponseEntity.ok(commonResponse);
-    }
 
     @GetMapping("/reservations/by-user")
     public ResponseEntity<CommonResponse<List<ReservationResponseDto>>> getListReservationsByUserId(@PathVariable Long userId){

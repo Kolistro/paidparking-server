@@ -3,12 +3,10 @@ package ru.omgu.paidparking_server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.omgu.paidparking_server.dto.request.ReservationRequestDto;
 import ru.omgu.paidparking_server.dto.response.ReservationResponseDto;
-import ru.omgu.paidparking_server.entity.BuildingEntity;
-import ru.omgu.paidparking_server.entity.CarEntity;
-import ru.omgu.paidparking_server.entity.ReservationEntity;
-import ru.omgu.paidparking_server.entity.UserEntity;
+import ru.omgu.paidparking_server.entity.*;
 import ru.omgu.paidparking_server.enums.ReservationStatus;
 import ru.omgu.paidparking_server.exception.*;
 import ru.omgu.paidparking_server.mapper.ReservationMapper;
@@ -29,6 +27,7 @@ public class ReservationService {
     private final BuildingRepo buildingRepo;
     private final ReservationMapper reservationMapper;
     private final ReservationHistoryService historyService;
+    private final PaymentService paymentService;
 
     public ReservationResponseDto addReservation(ReservationRequestDto reservation, Long userId){
         UserEntity user = userRepo.findById(userId)
@@ -52,16 +51,19 @@ public class ReservationService {
         return reservationMapper.toDto(reservationEntity);
     }
 
-    // метод будет автоматически вызываться через каждые 5 минут.
+    // метод будет автоматически вызываться через каждые 5 минут
+    // и менять статус на EXPIRED, у которых прошло 15 минут с момента создания
     @Scheduled(fixedRate = 300000)
+    @Transactional
     public void cancelExpiredReservations() {
-        // ToDo добавить так же здесь изменение статуса платежа на ИСТЁКШИЙ  (Payment.status меняет на EXPIRED)
         List<ReservationEntity> expiredReservations = reservationRepo.findByStatusAndCreatedAtBefore(
                 ReservationStatus.WAITING,
                 LocalDateTime.now().minusMinutes(15));
         for (ReservationEntity reservation : expiredReservations) {
-            reservation.setStatus(ReservationStatus.CANCELED);
+            reservation.setStatus(ReservationStatus.EXPIRED);
             reservationRepo.save(reservation);
+
+            paymentService.expiredPayment(reservation);
         }
     }
 
@@ -78,6 +80,7 @@ public class ReservationService {
         return reservationMapper.toDto(reservation);
     }
 
+    @Transactional
     public ReservationResponseDto completeReservation(Long reservationId) {
         ReservationEntity reservation = reservationRepo.findById(reservationId)
                 .orElseThrow(() -> new ReservationNotFoundException("Бронь не найдена"));
@@ -87,17 +90,6 @@ public class ReservationService {
         }
 
         reservation.setStatus(ReservationStatus.COMPLETED);
-        reservationRepo.save(reservation);
-        historyService.archiveReservation(reservation);
-
-        return reservationMapper.toDto(reservation);
-    }
-
-    public ReservationResponseDto expireReservation(Long reservationId) {
-        ReservationEntity reservation = reservationRepo.findById(reservationId)
-                .orElseThrow(() -> new ReservationNotFoundException("Бронь не найдена"));
-
-        reservation.setStatus(ReservationStatus.EXPIRED);
         reservationRepo.save(reservation);
         historyService.archiveReservation(reservation);
 

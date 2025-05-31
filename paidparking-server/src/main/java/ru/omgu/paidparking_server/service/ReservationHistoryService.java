@@ -40,11 +40,12 @@ public class ReservationHistoryService {
         if (payment != null) {
             history.setPaymentAmount(payment.getAmount());
             history.setPaymentStatus(payment.getStatus());
-            // Todo разобраться с этими полями
-//            history.setPaymentExternalId(payment.getExternalPaymentId());
-//            history.setPaymentDate(payment.getPaymentDate());
-//            history.setPaymentConfirmationDate(payment.getConfirmationDate());
-//            history.setPaymentRedirectUrl(payment.getRedirectUrl());
+            history.setPaymentCreatedAt(payment.getCreatedAt());
+            history.setPaymentConfirmedAt(payment.getConfirmedAt());
+            history.setPaymentReceiptUploadedAt(payment.getReceiptUploadedAt());
+            history.setReceiptFile(payment.getReceiptFile());
+            history.setReceiptFileName(payment.getReceiptFileName());
+            history.setReceiptContentType(payment.getReceiptContentType());
         }
 
         history.setArchivedAt(LocalDateTime.now());
