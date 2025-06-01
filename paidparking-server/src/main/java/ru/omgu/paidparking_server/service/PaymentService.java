@@ -42,11 +42,7 @@ public class PaymentService {
     }
 
     public void uploadPayment(Long reservationId, PaymentRequestDto dto) {
-        ReservationEntity reservation = reservationRepo.findById(reservationId)
-                .orElseThrow(() -> new ReservationNotFoundException("Бронирование с ID " + reservationId + " не найдено."));
-
-        PaymentEntity payment = paymentRepo.findByReservation(reservation)
-                .orElseThrow(() -> new PaymentNotFoundException("Для данного бронирования нет платежа."));
+        PaymentEntity payment = getPaymentByReservation(reservationId);
 
         MultipartFile file = dto.receiptFile();
         try {
@@ -100,6 +96,14 @@ public class PaymentService {
         ReservationEntity reservation = payment.getReservation();
         reservation.setStatus(ReservationStatus.CANCELED);
         reservationRepo.save(reservation);
+    }
+
+    public PaymentEntity getPaymentByReservation(Long reservationId){
+        ReservationEntity reservation = reservationRepo.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException("Бронирование с ID " + reservationId + " не найдено."));
+
+        return paymentRepo.findByReservation(reservation)
+                .orElseThrow(() -> new PaymentNotFoundException("Для данного бронирования нет платежа."));
     }
 
     public List<PaymentEntity> getPaymentsByStatus(PaymentStatus status) {

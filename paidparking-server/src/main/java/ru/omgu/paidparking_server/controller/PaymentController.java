@@ -4,11 +4,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.omgu.paidparking_server.dto.request.BuildingRequestDto;
 import ru.omgu.paidparking_server.dto.request.PaymentRequestDto;
-import ru.omgu.paidparking_server.dto.response.BuildingResponseDto;
 import ru.omgu.paidparking_server.dto.response.CommonResponse;
 import ru.omgu.paidparking_server.entity.PaymentEntity;
 import ru.omgu.paidparking_server.enums.PaymentStatus;
@@ -17,73 +16,73 @@ import ru.omgu.paidparking_server.service.PaymentService;
 import java.util.List;
 
 @RestController
-@RequestMapping("user/{userId}/reservation/{reservationId}/payment")
+@RequestMapping("users/{userId}/reservations/{reservationId}/payments")
 @RequiredArgsConstructor
 @Validated
 public class PaymentController {
     private final PaymentService paymentService;
 
+    @PreAuthorize("hasRole('ADMIN') or #userId == principal.id")
     @PostMapping
-    public ResponseEntity<CommonResponse<Void>> addPaymentForReservation(@PathVariable Long reservationId){
-        HttpStatus status = HttpStatus.OK;
+    public ResponseEntity<CommonResponse<Void>> addPaymentForReservation(@PathVariable Long userId,
+                                                                         @PathVariable Long reservationId){
         paymentService.addPaymentForReservation(reservationId);
-        CommonResponse<Void> commonResponse =
-                new CommonResponse<>(status.value());
-        return ResponseEntity.ok(commonResponse);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK.value()));
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #userId == principal.id")
     @PatchMapping
-    public ResponseEntity<CommonResponse<Void>> uploadPayment(@PathVariable Long reservationId, @Valid @RequestBody PaymentRequestDto dto){
-        HttpStatus status = HttpStatus.OK;
+    public ResponseEntity<CommonResponse<Void>> uploadPayment(@PathVariable Long userId,
+                                                              @PathVariable Long reservationId,
+                                                              @Valid @RequestBody PaymentRequestDto dto){
         paymentService.uploadPayment(reservationId, dto);
-        CommonResponse<Void> commonResponse =
-                new CommonResponse<>(status.value());
-        return ResponseEntity.ok(commonResponse);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK.value()));
     }
 
-    @PatchMapping("/{paymentId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{paymentId}/complete")
     public ResponseEntity<CommonResponse<Void>> completedPayment(@PathVariable Long paymentId){
-        HttpStatus status = HttpStatus.OK;
         paymentService.completedPayment(paymentId);
-        CommonResponse<Void> commonResponse =
-                new CommonResponse<>(status.value());
-        return ResponseEntity.ok(commonResponse);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK.value()));
     }
 
-    @PatchMapping("/{paymentId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{paymentId}/fail")
     public ResponseEntity<CommonResponse<Void>> failedPayment(@PathVariable Long paymentId){
-        HttpStatus status = HttpStatus.OK;
         paymentService.failedPayment(paymentId);
-        CommonResponse<Void> commonResponse =
-                new CommonResponse<>(status.value());
-        return ResponseEntity.ok(commonResponse);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK.value()));
     }
 
-    @PatchMapping("/{paymentId}")
+    @PreAuthorize("hasRole('ADMIN') or @paymentSecurity.isOwner(#paymentId, principal.id)")
+    @PatchMapping("/{paymentId}/cancel")
     public ResponseEntity<CommonResponse<Void>> cancelPayment(@PathVariable Long paymentId){
-        HttpStatus status = HttpStatus.OK;
         paymentService.cancelPayment(paymentId);
-        CommonResponse<Void> commonResponse =
-                new CommonResponse<>(status.value());
-        return ResponseEntity.ok(commonResponse);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK.value()));
     }
 
+    // Получение платежей по статусу — доступно только админу
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping(params = "paymentStatus")
+    public ResponseEntity<CommonResponse<List<PaymentEntity>>> getPaymentsByStatus(@PathVariable Long userId,
+                                                                                   @RequestParam PaymentStatus paymentStatus){
+        List<PaymentEntity> payments = paymentService.getPaymentsByStatus(paymentStatus);
+        return ResponseEntity.ok(new CommonResponse<>(payments, HttpStatus.OK.value()));
+    }
+
+    // Получение платежей по резервации — доступно пользователю и администратору
+    @PreAuthorize("hasRole('ADMIN') or #userId == principal.id")
     @GetMapping
-    public ResponseEntity<CommonResponse<List<PaymentEntity>>> getPaymentsByStatus(@RequestParam PaymentStatus paymentStatus){
-        HttpStatus status = HttpStatus.OK;
-        CommonResponse<List<PaymentEntity>> commonResponse =
-                new CommonResponse<>(paymentService.getPaymentsByStatus(paymentStatus), status.value());
-        return ResponseEntity.ok(commonResponse);
+    public ResponseEntity<CommonResponse<PaymentEntity>> getPaymentsByReservation(@PathVariable Long userId,
+                                                                                  @PathVariable Long reservationId){
+        PaymentEntity payment = paymentService.getPaymentByReservation(reservationId);
+        return ResponseEntity.ok(new CommonResponse<>(payment, HttpStatus.OK.value()));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{paymentId}")
     public ResponseEntity<CommonResponse<Void>> deletePayment(@PathVariable Long paymentId){
-        HttpStatus status = HttpStatus.OK;
         paymentService.deletePayment(paymentId);
-        CommonResponse<Void> commonResponse =
-                new CommonResponse<>(status.value());
-        return ResponseEntity.ok(commonResponse);
+        return ResponseEntity.ok(new CommonResponse<>(HttpStatus.OK.value()));
     }
-
-
 }
+

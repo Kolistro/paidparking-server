@@ -5,63 +5,86 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.omgu.paidparking_server.dto.request.UserRequestDto;
 import ru.omgu.paidparking_server.dto.response.CommonResponse;
 import ru.omgu.paidparking_server.dto.response.UserResponseDto;
+import ru.omgu.paidparking_server.security.CustomUserDetails;
 import ru.omgu.paidparking_server.service.UserService;
 import ru.omgu.paidparking_server.validation.annotation.ValidPhoneNumber;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/user")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Validated
 public class UserController {
+
     private final UserService userService;
 
-    @PutMapping("/{id}")
-    public ResponseEntity<CommonResponse<UserResponseDto>> editUser(@Valid @RequestBody UserRequestDto user, @PathVariable Long id){
-        HttpStatus status = HttpStatus.OK;
-        CommonResponse<UserResponseDto> commonResponse =
-                new CommonResponse<>(userService.editUser(user, id), status.value());
-        return ResponseEntity.ok(commonResponse);
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<CommonResponse<UserResponseDto>> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
+        CommonResponse<UserResponseDto> response =
+                new CommonResponse<>(userService.getUserById(userId), HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping
-    public ResponseEntity<CommonResponse<UserResponseDto>> getUserByPhoneNumber(@ValidPhoneNumber @RequestParam String phoneNumber){
-        HttpStatus status = HttpStatus.OK;
-        CommonResponse<UserResponseDto> commonResponse =
-                new CommonResponse<>(userService.getUserByPhoneNumber(phoneNumber), status.value());
-        return ResponseEntity.ok(commonResponse);
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<CommonResponse<UserResponseDto>> editCurrentUser(
+            @Valid @RequestBody UserRequestDto userDto,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
+        CommonResponse<UserResponseDto> response =
+                new CommonResponse<>(userService.editUser(userDto, userId), HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
+    public ResponseEntity<CommonResponse<UserResponseDto>> editUser(@Valid @RequestBody UserRequestDto userDto, @PathVariable Long id) {
+        CommonResponse<UserResponseDto> response =
+                new CommonResponse<>(userService.editUser(userDto, id), HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CommonResponse<UserResponseDto>> getUserById(@PathVariable Long id){
-        HttpStatus status = HttpStatus.OK;
-        CommonResponse<UserResponseDto> commonResponse =
-                new CommonResponse<>(userService.getUserById(id), status.value());
-        return ResponseEntity.ok(commonResponse);
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
+    public ResponseEntity<CommonResponse<UserResponseDto>> getUserById(@PathVariable Long id) {
+        CommonResponse<UserResponseDto> response =
+                new CommonResponse<>(userService.getUserById(id), HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/users")
-    public ResponseEntity<CommonResponse<List<UserResponseDto>>> getAllUsers(){
-        HttpStatus status = HttpStatus.OK;
-        CommonResponse<List<UserResponseDto>> commonResponse =
-                new CommonResponse<>(userService.getAllUsers(), status.value());
-        return ResponseEntity.ok(commonResponse);
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonResponse<UserResponseDto>> getUserByPhoneNumber(@ValidPhoneNumber @RequestParam String phoneNumber) {
+        CommonResponse<UserResponseDto> response =
+                new CommonResponse<>(userService.getUserByPhoneNumber(phoneNumber), HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
-    @Transactional
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonResponse<List<UserResponseDto>>> getAllUsers() {
+        CommonResponse<List<UserResponseDto>> response =
+                new CommonResponse<>(userService.getAllUsers(), HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<CommonResponse<Long>> deleteUser(@PathVariable Long id){
-        HttpStatus status = HttpStatus.OK;
-        CommonResponse<Long> commonResponse =
-                new CommonResponse<>(userService.deleteUser(id), status.value());
-        return ResponseEntity.ok(commonResponse);
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
+    public ResponseEntity<CommonResponse<Long>> deleteUser(@PathVariable Long id) {
+        Long deletedId = userService.deleteUser(id);
+        CommonResponse<Long> response = new CommonResponse<>(deletedId, HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
-
-
 }
+

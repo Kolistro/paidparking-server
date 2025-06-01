@@ -67,12 +67,14 @@ public class ReservationService {
         }
     }
 
-    public ReservationResponseDto updateStatusToActive(Long reservationId) {
+    public ReservationResponseDto updateStatusToActive(Long reservationId, Long userId) {
         ReservationEntity reservation = reservationRepo.findById(reservationId)
                 .orElseThrow(() -> new ReservationNotFoundException("Бронь не найдена"));
+        userRepo.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователя c id = " + userId + " не существует."));
 
         if (reservation.getStatus() == ReservationStatus.WAITING) {
-            reservation.setStatus(ReservationStatus.ACTIVE);  // Статус меняется на ACTIVE
+            reservation.setStatus(ReservationStatus.ACTIVE);
             reservationRepo.save(reservation);
         } else {
             throw new ReservationInvalidStatusException("Можно активировать только бронирования со статусом WAITING");
@@ -81,9 +83,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponseDto completeReservation(Long reservationId) {
+    public ReservationResponseDto completeReservation(Long reservationId, Long userId) {
         ReservationEntity reservation = reservationRepo.findById(reservationId)
                 .orElseThrow(() -> new ReservationNotFoundException("Бронь не найдена"));
+        userRepo.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователя c id = " + userId + " не существует."));
 
         if (reservation.getStatus() != ReservationStatus.ACTIVE) {
             throw new ReservationInvalidStatusException("Завершить можно только бронь со статусом ACTIVE");
@@ -123,9 +127,11 @@ public class ReservationService {
         reservationRepo.deleteAllByUserId(userId);
     }
 
-    public void delete(Long id){
+    public void delete(Long id, Long userId){
         reservationRepo.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("Брони c id = " + id + " не существует."));
+        userRepo.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователя c id = " + userId + " не существует."));
         reservationRepo.deleteById(id);
     }
 }

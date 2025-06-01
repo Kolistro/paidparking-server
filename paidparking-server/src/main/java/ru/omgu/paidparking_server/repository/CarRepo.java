@@ -12,4 +12,6 @@ public interface CarRepo extends JpaRepository<CarEntity, Long> {
     @Query("SELECT c FROM CarEntity c JOIN c.users u WHERE c.carNumber = :carNumber AND u.id = :userId")
     Optional<CarEntity> findByCarNumberAndUserId(@Param("carNumber") String carNumber,
                                                  @Param("userId") Long userId);
+
+    Optional<CarEntity> findByCarIdAndUserId(Long carId, Long userId);
 }

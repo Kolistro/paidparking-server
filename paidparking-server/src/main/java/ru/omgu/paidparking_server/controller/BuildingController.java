@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.omgu.paidparking_server.dto.request.BuildingRequestDto;
 import ru.omgu.paidparking_server.dto.response.BuildingResponseDto;
@@ -13,67 +15,68 @@ import ru.omgu.paidparking_server.service.BuildingService;
 
 import java.util.List;
 
-@RestController("/building")
+@RestController
+@RequestMapping("/api/buildings")
 @RequiredArgsConstructor
+@Validated
 public class BuildingController {
+
     private final BuildingService buildingService;
 
     @PostMapping
-    public ResponseEntity<CommonResponse<BuildingResponseDto>> addBuilding(@Valid @RequestBody BuildingRequestDto building){
-        HttpStatus status = HttpStatus.OK;
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonResponse<BuildingResponseDto>> addBuilding(@Valid @RequestBody BuildingRequestDto building) {
         CommonResponse<BuildingResponseDto> commonResponse =
-                new CommonResponse<>(buildingService.addBuilding(building), status.value());
+                new CommonResponse<>(buildingService.addBuilding(building), HttpStatus.OK.value());
         return ResponseEntity.ok(commonResponse);
     }
 
-    @PutMapping
-    public ResponseEntity<CommonResponse<BuildingResponseDto>> editBuilding(@Valid @RequestBody BuildingRequestDto building){
-        HttpStatus status = HttpStatus.OK;
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonResponse<BuildingResponseDto>> editBuilding(
+            @PathVariable Long id,
+            @Valid @RequestBody BuildingRequestDto building) {
         CommonResponse<BuildingResponseDto> commonResponse =
-                new CommonResponse<>(buildingService.editBuilding(building), status.value());
-        return ResponseEntity.ok(commonResponse);
-    }
-
-    @GetMapping("/buildings")
-    public ResponseEntity<CommonResponse<List<BuildingResponseDto>>> getListBuildings(){
-        HttpStatus status = HttpStatus.OK;
-        CommonResponse<List<BuildingResponseDto>> commonResponse =
-                new CommonResponse<>(buildingService.getListBuildings(), status.value());
+                new CommonResponse<>(buildingService.editBuilding(building), HttpStatus.OK.value());
         return ResponseEntity.ok(commonResponse);
     }
 
     @GetMapping
+    public ResponseEntity<CommonResponse<List<BuildingResponseDto>>> getListBuildings() {
+        CommonResponse<List<BuildingResponseDto>> commonResponse =
+                new CommonResponse<>(buildingService.getListBuildings(), HttpStatus.OK.value());
+        return ResponseEntity.ok(commonResponse);
+    }
+
+    @GetMapping("/search")
     public ResponseEntity<CommonResponse<BuildingResponseDto>> getBuildingByLocationName(
             @Size(max = 100, message = "Название объекта не должно превышать 100 символов.")
-            @RequestParam String locationName){
-        HttpStatus status = HttpStatus.OK;
+            @RequestParam String locationName) {
         CommonResponse<BuildingResponseDto> commonResponse =
-                new CommonResponse<>(buildingService.getBuildingByLocationName(locationName), status.value());
+                new CommonResponse<>(buildingService.getBuildingByLocationName(locationName), HttpStatus.OK.value());
         return ResponseEntity.ok(commonResponse);
     }
 
     @GetMapping("/{id}/availability")
-    public ResponseEntity<CommonResponse<Boolean>> isAvailableParkingSpots(@PathVariable Long id){
-        HttpStatus status = HttpStatus.OK;
+    public ResponseEntity<CommonResponse<Boolean>> isAvailableParkingSpots(@PathVariable Long id) {
         CommonResponse<Boolean> commonResponse =
-                new CommonResponse<>(buildingService.isAvailableParkingSpots(id), status.value());
+                new CommonResponse<>(buildingService.isAvailableParkingSpots(id), HttpStatus.OK.value());
         return ResponseEntity.ok(commonResponse);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CommonResponse<Long>> getCountAvailableParkingSpots(@PathVariable Long id){
-        HttpStatus status = HttpStatus.OK;
+    @GetMapping("/{id}/available-spots")
+    public ResponseEntity<CommonResponse<Long>> getCountAvailableParkingSpots(@PathVariable Long id) {
         CommonResponse<Long> commonResponse =
-                new CommonResponse<>(buildingService.getCountAvailableParkingSpots(id), status.value());
+                new CommonResponse<>(buildingService.getCountAvailableParkingSpots(id), HttpStatus.OK.value());
         return ResponseEntity.ok(commonResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CommonResponse<Long>> delete(@PathVariable Long id){
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CommonResponse<Long>> delete(@PathVariable Long id) {
         buildingService.delete(id);
-        HttpStatus status = HttpStatus.OK;
-        CommonResponse<Long> commonResponse =
-                new CommonResponse<>(status.value());
+        CommonResponse<Long> commonResponse = new CommonResponse<>(HttpStatus.OK.value());
         return ResponseEntity.ok(commonResponse);
     }
 }
+

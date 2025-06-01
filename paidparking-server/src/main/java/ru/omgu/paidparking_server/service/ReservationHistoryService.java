@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.omgu.paidparking_server.entity.*;
 import ru.omgu.paidparking_server.exception.ReservationHistoryNotFoundException;
+import ru.omgu.paidparking_server.exception.UserNotFoundException;
 import ru.omgu.paidparking_server.repository.ReservationHistoryRepo;
+import ru.omgu.paidparking_server.repository.UserRepo;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReservationHistoryService {
     private final ReservationHistoryRepo historyRepo;
+    private final UserRepo userRepo;
 
     public void archiveReservation(ReservationEntity reservation) {
         ReservationHistoryEntity history = new ReservationHistoryEntity();
@@ -53,10 +56,6 @@ public class ReservationHistoryService {
         historyRepo.save(history);
     }
 
-    public List<ReservationHistoryEntity> getHistoryByUserId(Long userId) {
-        return historyRepo.findAllByUserId(userId);
-    }
-
     public ReservationHistoryEntity getHistoryById(Long id) {
         return historyRepo.findById(id)
                 .orElseThrow(() -> new ReservationHistoryNotFoundException(
@@ -65,6 +64,13 @@ public class ReservationHistoryService {
 
     public List<ReservationHistoryEntity> getAllHistory() {
         return historyRepo.findAll();
+    }
+
+    public List<ReservationHistoryEntity> getAllHistoryByUserId(Long userId) {
+        UserEntity user = userRepo.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователя c id = " + userId + " не существует."));
+
+        return historyRepo.findAllByUserId(userId);
     }
 
     public Long delete(Long id){
