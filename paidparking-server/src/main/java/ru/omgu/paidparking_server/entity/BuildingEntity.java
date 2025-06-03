@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import ru.omgu.paidparking_server.validation.annotation.ValidParkingSpots;
-import ru.omgu.paidparking_server.validation.annotation.ValidWorkingHours;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -18,8 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ValidWorkingHours
-@ValidParkingSpots
 public class BuildingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,18 +2,18 @@ package ru.omgu.paidparking_server.validation.validator;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import ru.omgu.paidparking_server.entity.ReservationEntity;
+import ru.omgu.paidparking_server.dto.request.ReservationRequestDto;
 import ru.omgu.paidparking_server.validation.annotation.ValidReservationTime;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public class ReservationTimeValidator implements ConstraintValidator<ValidReservationTime, ReservationEntity> {
+public class ReservationTimeValidator implements ConstraintValidator<ValidReservationTime, ReservationRequestDto> {
 
     @Override
-    public boolean isValid(ReservationEntity reservation, ConstraintValidatorContext context) {
-        LocalDateTime start = reservation.getStartTime();
-        LocalDateTime end = reservation.getEndTime();
+    public boolean isValid(ReservationRequestDto reservation, ConstraintValidatorContext context) {
+        LocalDateTime start = reservation.startTime();
+        LocalDateTime end = reservation.endTime();
 
         if (start == null || end == null) {
             return true; // Обрабатывается отдельно аннотациями @NotNull

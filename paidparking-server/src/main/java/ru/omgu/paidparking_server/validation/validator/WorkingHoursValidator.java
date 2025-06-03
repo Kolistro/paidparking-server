@@ -2,17 +2,17 @@ package ru.omgu.paidparking_server.validation.validator;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import ru.omgu.paidparking_server.entity.BuildingEntity;
+import ru.omgu.paidparking_server.dto.request.BuildingRequestDto;
 import ru.omgu.paidparking_server.validation.annotation.ValidWorkingHours;
 
-public class WorkingHoursValidator implements ConstraintValidator<ValidWorkingHours, BuildingEntity> {
+public class WorkingHoursValidator implements ConstraintValidator<ValidWorkingHours, BuildingRequestDto> {
 
     @Override
-    public boolean isValid(BuildingEntity building, ConstraintValidatorContext context) {
-        if (building.getWorkingHoursStart() == null || building.getWorkingHoursEnd() == null) {
+    public boolean isValid(BuildingRequestDto building, ConstraintValidatorContext context) {
+        if (building.workingHoursStart() == null || building.workingHoursEnd() == null) {
             return true; // Для @NotNull можно добавить отдельные аннотации
         }
 
-        return building.getWorkingHoursEnd().isAfter(building.getWorkingHoursStart());
+        return building.workingHoursEnd().isAfter(building.workingHoursStart());
     }
 }
