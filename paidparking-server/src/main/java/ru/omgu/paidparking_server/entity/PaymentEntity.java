@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 public class PaymentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
     @EqualsAndHashCode.Include
     private Long id;
 

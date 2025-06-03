@@ -16,7 +16,7 @@ import java.util.Set;
 public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
+    @EqualsAndHashCode.Include
     private Long id;
     @Enumerated(EnumType.STRING)
     private Role role;

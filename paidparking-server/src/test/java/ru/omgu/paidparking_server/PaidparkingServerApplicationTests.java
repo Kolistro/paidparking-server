@@ -1,16 +1,14 @@
 package ru.omgu.paidparking_server;
 
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.junit.jupiter.api.Test;
 import ru.omgu.paidparking_server.dto.request.RegisterRequestDto;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 @SpringBootTest
 class PaidparkingServerApplicationTests {
+	private jakarta.validation.Validation Validation;
 	private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
 	@Test

@@ -26,14 +26,14 @@ public class ReservationHistoryController {
         return ResponseEntity.ok(commonResponse);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
-    public ResponseEntity<CommonResponse<List<ReservationHistoryEntity>>> getAllHistory(){
-        HttpStatus status = HttpStatus.OK;
-        CommonResponse<List<ReservationHistoryEntity>> commonResponse =
-                new CommonResponse<>(historyService.getAllHistory(), status.value());
-        return ResponseEntity.ok(commonResponse);
-    }
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping
+//    public ResponseEntity<CommonResponse<List<ReservationHistoryEntity>>> getAllHistory(){
+//        HttpStatus status = HttpStatus.OK;
+//        CommonResponse<List<ReservationHistoryEntity>> commonResponse =
+//                new CommonResponse<>(historyService.getAllHistory(), status.value());
+//        return ResponseEntity.ok(commonResponse);
+//    }
 
     @PreAuthorize("hasRole('ADMIN') or #userId == principal.id")
     @GetMapping

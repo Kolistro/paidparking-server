@@ -127,12 +127,21 @@ public class PaymentService {
         }
     }
 
-    private Long getAmount(ReservationEntity reservation){
-        Long costPerHour = reservation.getBuilding().getCostPerHour();
+    private Long getAmount(ReservationEntity reservation) {
+        if (reservation.getBuilding() == null || reservation.getBuilding().getCostPerHour() == null) {
+            throw new IllegalArgumentException("Здание или стоимость за час не указаны.");
+        }
+
         LocalDateTime start = reservation.getStartTime();
         LocalDateTime end = reservation.getEndTime();
 
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("Время начала или окончания бронирования не указано.");
+        }
+
+        Long costPerHour = reservation.getBuilding().getCostPerHour();
         Duration duration = Duration.between(start, end);
+
         // Получаем количество часов (округляем вверх, 1ч 10м — считаем за 2ч)
         long hours = (long) Math.ceil(duration.toMinutes() / 60.0);
         return costPerHour * hours;

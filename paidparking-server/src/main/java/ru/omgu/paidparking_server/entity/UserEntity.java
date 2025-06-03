@@ -22,7 +22,7 @@ import java.util.Set;
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
+    @EqualsAndHashCode.Include
     private Long id;
     @ValidName
     private String firstName;

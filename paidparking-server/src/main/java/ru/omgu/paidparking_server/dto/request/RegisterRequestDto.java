@@ -13,17 +13,4 @@ public record RegisterRequestDto(
         @ValidCarNumber String carNumber,
         @ValidPassword String password
 ) {
-//        public RegisterRequestDto(
-//                @ValidName String firstName,
-//                @ValidName String lastName,
-//                @ValidPhoneNumber @NotNull String phoneNumber,
-//                @ValidCarNumber String carNumber,
-//                @ValidPassword String password
-//        ) {
-//                this.firstName = firstName;
-//                this.lastName = lastName;
-//                this.phoneNumber = phoneNumber;
-//                this.carNumber = carNumber;
-//                this.password = password;
-//        }
 }

@@ -3,9 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/paidparking-server.iml" filepath="$PROJECT_DIR$/.idea/paidparking-server.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/paidparking-server.paidparking-server.main.iml" filepath="$PROJECT_DIR$/.idea/modules/paidparking-server.paidparking-server.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/paidparking-server.paidparking-server.main~1.iml" filepath="$PROJECT_DIR$/.idea/modules/paidparking-server.paidparking-server.main~1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/paidparking-server.paidparking-server.main~2.iml" filepath="$PROJECT_DIR$/.idea/modules/paidparking-server.paidparking-server.main~2.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/paidparking-server.paidparking-server.test~1.iml" filepath="$PROJECT_DIR$/.idea/modules/paidparking-server.paidparking-server.test~1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/paidparking-server.paidparking-server.test~2.iml" filepath="$PROJECT_DIR$/.idea/modules/paidparking-server.paidparking-server.test~2.iml" />
     </modules>
   </component>
 </project>

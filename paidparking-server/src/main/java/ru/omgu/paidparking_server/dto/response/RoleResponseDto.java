@@ -6,4 +6,7 @@ public record RoleResponseDto(
         Long id,
         Role role
 ) {
+    public RoleResponseDto(Long id, String role) {
+        this(id, Role.valueOf(role));
+    }
 }

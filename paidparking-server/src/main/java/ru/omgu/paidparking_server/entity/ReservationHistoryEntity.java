@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 public class ReservationHistoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     // Данные пользователя

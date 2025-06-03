@@ -26,12 +26,17 @@ public class CarService {
                 .orElseThrow(() -> new UserNotFoundException("Пользователя c id = " + userId + " не существует."));
 
         CarEntity carEntity = carRepo.findByCarNumber(car.carNumber())
-                .orElseGet(() -> carMapper.toEntity(car));
+                .orElseGet(() -> {
+                    CarEntity newCar = carMapper.toEntity(car);
+                    carRepo.save(newCar);
+                    return newCar;
+                });
+
         Set<UserEntity> users = carEntity.getUsers();
         users.add(user);
         carEntity.setUsers(users);
-        carRepo.save(carEntity);
-        return  carMapper.toDto(carEntity);
+
+        return carMapper.toDto(carEntity);
     }
 
     public CarResponseDto editCar(CarRequestDto car, Long carId, Long userId){
@@ -63,9 +68,8 @@ public class CarService {
     public Long deleteByUserId(Long carId, Long userId){
         UserEntity user = userRepo.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователя c id = " + userId + " не существует."));
-        CarEntity carEntity = carRepo.findByCarIdAndUserId(carId, userId)
-                .orElseThrow(() -> new CarNotFoundException("Автомобиль c id " + carId +
-                        " и userId = " + userId + " не существует."));
+        CarEntity carEntity = carRepo.findById(carId)
+                .orElseThrow(() -> new CarNotFoundException("Автомобиль c id " + carId + "не существует."));
         Set<UserEntity> users = carEntity.getUsers();
         users.remove(user);
         if(users.isEmpty()){

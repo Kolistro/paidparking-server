@@ -2,6 +2,7 @@ package ru.omgu.paidparking_server.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -63,18 +64,20 @@ public class AuthService {
     }
 
     public AuthResponseDto authenticate(AuthRequestDto request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.phoneNumber(),
-                        request.password()
-                )
-        );
-
         UserEntity user = userRepo.findByPhoneNumber(request.phoneNumber())
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
 
-        String jwtToken = jwtService.generateToken(user);
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new BadCredentialsException("Неверный пароль");
+        }
 
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.phoneNumber(),
+                        request.password())
+        );
+
+        String jwtToken = jwtService.generateToken(user);
         return new AuthResponseDto(user.getId(), jwtToken);
     }
 }

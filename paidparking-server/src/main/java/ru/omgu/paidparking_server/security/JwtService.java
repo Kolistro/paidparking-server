@@ -1,9 +1,9 @@
 package ru.omgu.paidparking_server.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.omgu.paidparking_server.entity.UserEntity;
 
@@ -33,9 +33,18 @@ public class JwtService {
                 .getSubject();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        String phone = extractPhoneNumber(token);
-        return (phone.equals(userDetails.getUsername()) && !isTokenExpired(token));
+//    public boolean isTokenValid(String token, UserDetails userDetails) {
+//        String phone = extractPhoneNumber(token);
+//        return (phone.equals(userDetails.getUsername()) && !isTokenExpired(token));
+//    }
+
+    public boolean isTokenValid(String token, CustomUserDetails userDetails) {
+        try {
+            String phone = extractPhoneNumber(token);
+            return (phone.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (ExpiredJwtException e) {
+            return false; // Токен просрочен
+        }
     }
 
     private boolean isTokenExpired(String token) {

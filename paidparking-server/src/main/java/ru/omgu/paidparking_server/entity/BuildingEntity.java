@@ -23,7 +23,7 @@ import java.util.List;
 public class BuildingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
+    @EqualsAndHashCode.Include
     private Long id;
     @Size(max = 100, message = "Название объекта не должно превышать 100 символов.")
     @Column(unique = true)

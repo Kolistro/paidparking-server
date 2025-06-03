@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class ReservationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
+    @EqualsAndHashCode.Include
     private Long id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

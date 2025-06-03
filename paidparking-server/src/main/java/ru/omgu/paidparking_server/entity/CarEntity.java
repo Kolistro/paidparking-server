@@ -20,7 +20,7 @@ import java.util.Set;
 public class CarEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
+    @EqualsAndHashCode.Include
     private Long id;
     @Column(unique = true)
     @ValidCarNumber
